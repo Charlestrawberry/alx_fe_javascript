@@ -229,6 +229,8 @@ async function syncQuotes() {
     populateCategories();
     filterQuotes();
 
+    // Notify the user that quotes have been synced
+    notifyUser("Quotes synced with server!");
     console.log("Quotes synced with server.");
   } catch (error) {
     console.error("Error syncing quotes with server:", error);
