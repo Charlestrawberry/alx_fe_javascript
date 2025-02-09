@@ -78,7 +78,8 @@ function addQuote() {
   const newQuoteCategory = document.getElementById("newQuoteCategory").value.trim();
 
   if (newQuoteText && newQuoteCategory) {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
+    const newQuote = { text: newQuoteText, category: newQuoteCategory };
+    quotes.push(newQuote);
 
     // Save quotes to localStorage
     saveQuotes();
@@ -89,6 +90,9 @@ function addQuote() {
     // Clear input fields
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
+
+    // Post the new quote to the server
+    postQuoteToServer(newQuote);
 
     alert("Quote added successfully!");
     filterQuotes(); // Refresh displayed quotes
@@ -162,6 +166,7 @@ function importFromJsonFile(event) {
 // Simulate server interaction
 const API_URL = "https://jsonplaceholder.typicode.com/posts"; // Replace with your API endpoint
 
+// Fetch quotes from the server
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(API_URL);
@@ -170,6 +175,28 @@ async function fetchQuotesFromServer() {
   } catch (error) {
     console.error("Failed to fetch quotes from server:", error);
     return [];
+  }
+}
+
+// Post a new quote to the server
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST", // Use POST method
+      headers: {
+        "Content-Type": "application/json", // Set content type to JSON
+      },
+      body: JSON.stringify(quote), // Send the quote as JSON
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to post quote to server.");
+    }
+
+    const data = await response.json();
+    console.log("Quote posted to server:", data);
+  } catch (error) {
+    console.error("Error posting quote to server:", error);
   }
 }
 
