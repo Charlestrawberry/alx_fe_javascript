@@ -201,32 +201,38 @@ async function postQuoteToServer(quote) {
 }
 
 // Sync quotes with the server
-async function syncWithServer() {
-  const serverQuotes = await fetchQuotesFromServer();
+async function syncQuotes() {
+  try {
+    const serverQuotes = await fetchQuotesFromServer();
 
-  // Check for conflicts
-  const conflicts = serverQuotes.filter(serverQuote =>
-    quotes.some(localQuote => localQuote.text === serverQuote.text && localQuote.category !== serverQuote.category)
-  );
+    // Check for conflicts
+    const conflicts = serverQuotes.filter(serverQuote =>
+      quotes.some(localQuote => localQuote.text === serverQuote.text && localQuote.category !== serverQuote.category)
+    );
 
-  if (conflicts.length > 0) {
-    notifyUser("Conflicts detected. Server data will take precedence.");
-  }
-
-  // Merge server quotes with local quotes
-  serverQuotes.forEach(serverQuote => {
-    const exists = quotes.some(localQuote => localQuote.text === serverQuote.text);
-    if (!exists) {
-      quotes.push(serverQuote);
+    if (conflicts.length > 0) {
+      notifyUser("Conflicts detected. Server data will take precedence.");
     }
-  });
 
-  // Save updated quotes to localStorage
-  saveQuotes();
+    // Merge server quotes with local quotes
+    serverQuotes.forEach(serverQuote => {
+      const exists = quotes.some(localQuote => localQuote.text === serverQuote.text);
+      if (!exists) {
+        quotes.push(serverQuote);
+      }
+    });
 
-  // Refresh the UI
-  populateCategories();
-  filterQuotes();
+    // Save updated quotes to localStorage
+    saveQuotes();
+
+    // Refresh the UI
+    populateCategories();
+    filterQuotes();
+
+    console.log("Quotes synced with server.");
+  } catch (error) {
+    console.error("Error syncing quotes with server:", error);
+  }
 }
 
 // Notify the user of updates or conflicts
@@ -255,5 +261,5 @@ document.addEventListener("DOMContentLoaded", () => {
   filterQuotes();
 
   // Sync with the server every 30 seconds
-  setInterval(syncWithServer, 30000);
+  setInterval(syncQuotes, 30000);
 });
