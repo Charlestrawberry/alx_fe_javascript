@@ -90,28 +90,36 @@ function addQuote() {
   }
 }
 
-
 function exportToJsonFile() {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(quotes));
+  const jsonString = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" }); // Explicit use of Blob and application/json
+  const url = URL.createObjectURL(blob);
+
   const downloadAnchor = document.createElement("a");
-  downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", "quotes.json");
+  downloadAnchor.href = url;
+  downloadAnchor.download = "quotes.json";
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   document.body.removeChild(downloadAnchor);
+  URL.revokeObjectURL(url); // Clean up the URL object
 }
 
 document.body.innerHTML += '<button onclick="exportToJsonFile()">Export Quotes</button>';
 document.body.innerHTML += '<input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />';
 
 function importFromJsonFile(event) {
-  const fileReader = new FileReader();
-  fileReader.onload = function(event) {
-    const importedQuotes = JSON.parse(event.target.result);
-    quotes.push(...importedQuotes);
-    saveQuotes();
-    alert("Quotes imported successfully!");
-    showRandomQuote();
-  };
-  fileReader.readAsText(event.target.files[0]);
+  const file = event.target.files[0];
+  if (file && file.type === "application/json") { // Explicit check for application/json
+    const fileReader = new FileReader();
+    fileReader.onload = function (event) {
+      const importedQuotes = JSON.parse(event.target.result);
+      quotes.push(...importedQuotes);
+      saveQuotes();
+      alert("Quotes imported successfully!");
+      showRandomQuote();
+    };
+    fileReader.readAsText(file);
+  } else {
+    alert("Please upload a valid JSON file.");
+  }
 }
