@@ -1,4 +1,4 @@
-const quotes = [
+const quotes = JSON.parse(localStorage.getItem("quotes")) || [
   {
     text: "The only way to do great work is to love what you do.",
     category: "Motivation",
@@ -66,7 +66,10 @@ function createAddQuoteForm() {
   formContainer.appendChild(inputCategory);
   formContainer.appendChild(addButton);
 
-  document.body.appendChild(formContainer);
+  const existingForm = document.getElementById("quoteFormContainer");
+  if (!existingForm) {
+    document.body.appendChild(formContainer); // Prevent multiple forms from being added
+  }
 }
 
 function addQuote() {
@@ -108,7 +111,7 @@ function importFromJsonFile(event) {
     quotes.push(...importedQuotes);
     saveQuotes();
     alert("Quotes imported successfully!");
-    displayRandomQuote();
+    showRandomQuote();
   };
   fileReader.readAsText(event.target.files[0]);
 }
